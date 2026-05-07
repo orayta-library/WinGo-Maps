@@ -1,7 +1,7 @@
 using System;
-using System.Net.Http;
 using Windows.ApplicationModel.Core;
 using Windows.UI.Core;
+using Windows.Web.Http;
 
 namespace WinGoMapsX
 {

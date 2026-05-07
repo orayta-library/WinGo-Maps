@@ -149,7 +149,7 @@ namespace WinGoMapsX.ViewModel.OfflineMapDownloader
                 var http = AppCore.HttpClient;
                 http.DefaultRequestHeaders.Accept.ParseAdd("text/html, application/xhtml+xml, image/jxr, */*");
                 http.DefaultRequestHeaders.AcceptLanguage.ParseAdd("en-US,en;q=0.7,fa;q=0.3");
-                http.DefaultRequestHeaders.Cookie.ParseAdd($"IP_JAR={DateTime.Now.Year}-{DateTime.Now.Month}-{DateTime.Now.Day}-21");
+                // Cookie header not supported in Windows.Web.Http - using default cookie manager
                 http.DefaultRequestHeaders.UserAgent.ParseAdd($"{AppCore.HttpUserAgent}");
                 var res = await http.GetAsync(url);
                 var buffer = await res.Content.ReadAsBufferAsync();
