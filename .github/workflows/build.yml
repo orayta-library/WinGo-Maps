@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2022
     
     env:
       Solution_Name: WinGoMapsX.sln
@@ -20,34 +20,20 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
       
-    - name: Setup MSBuild
+    - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v2
+      with:
+        msbuild-architecture: x64
       
-    - name: Setup NuGet
-      uses: NuGet/setup-nuget@v2
-    
-    - name: Check Windows SDK
-      shell: pwsh
-      run: |
-        Write-Host "Checking for Windows SDK..."
-        Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\References" -ErrorAction SilentlyContinue
-        Write-Host "MSBuild location:"
-        where.exe msbuild
-      
-    - name: Restore NuGet packages
-      run: nuget restore $env:Solution_Name
-      
-    - name: Restore project dependencies
-      run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration /p:Platform=$env:Platform
+    - name: Restore with MSBuild
+      run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration /p:Platform=$env:Platform /p:RestorePackagesConfig=true
       
     - name: Build solution
-      run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:Platform=$env:Platform /p:AppxBundle=Always /p:UapAppxPackageBuildMode=StoreUpload /p:GenerateAppxPackageOnBuild=true /p:TargetPlatformVersion=10.0.19041.0
+      run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:Platform=$env:Platform /p:AppxBundlePlatforms="x64" /p:AppxBundle=Always /p:UapAppxPackageBuildMode=SideloadOnly /p:AppxPackageSigningEnabled=false
       
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: WinGoMapsX-Package
         path: |
-          **/AppPackages/**/*.msix
-          **/AppPackages/**/*.appx
-          **/AppPackages/**/*.appxbundle
+          WinGoMapsX/AppPackages/**
