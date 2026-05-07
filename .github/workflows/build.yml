@@ -29,8 +29,11 @@ jobs:
     - name: Restore NuGet packages
       run: nuget restore $env:Solution_Name
       
+    - name: Restore project dependencies
+      run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration /p:Platform=$env:Platform
+      
     - name: Build solution
-      run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:Platform=$env:Platform /p:AppxBundle=Always /p:UapAppxPackageBuildMode=StoreUpload
+      run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:Platform=$env:Platform /p:AppxBundle=Always /p:UapAppxPackageBuildMode=StoreUpload /p:GenerateAppxPackageOnBuild=true
       
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
