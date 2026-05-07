@@ -25,6 +25,14 @@ jobs:
       
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v2
+    
+    - name: Check Windows SDK
+      shell: pwsh
+      run: |
+        Write-Host "Checking for Windows SDK..."
+        Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\References" -ErrorAction SilentlyContinue
+        Write-Host "MSBuild location:"
+        where.exe msbuild
       
     - name: Restore NuGet packages
       run: nuget restore $env:Solution_Name
@@ -33,7 +41,7 @@ jobs:
       run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration /p:Platform=$env:Platform
       
     - name: Build solution
-      run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:Platform=$env:Platform /p:AppxBundle=Always /p:UapAppxPackageBuildMode=StoreUpload /p:GenerateAppxPackageOnBuild=true
+      run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:Platform=$env:Platform /p:AppxBundle=Always /p:UapAppxPackageBuildMode=StoreUpload /p:GenerateAppxPackageOnBuild=true /p:TargetPlatformVersion=10.0.19041.0
       
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
