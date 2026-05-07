@@ -15,6 +15,8 @@ jobs:
       Solution_Name: WinGoMapsX.sln
       Configuration: Release
       Platform: x64
+      PackageCertificatePath: ${{ github.workspace }}\msix-signing-cert.pfx
+      PackageCertificateCerPath: ${{ github.workspace }}\msix-signing-cert.cer
       
     steps:
     - name: Checkout
@@ -27,9 +29,21 @@ jobs:
       
     - name: Restore with MSBuild
       run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration /p:Platform=$env:Platform /p:RestorePackagesConfig=true
+
+    - name: Create signing certificate file
+      shell: pwsh
+      run: |
+        $certPasswordPlain = [Guid]::NewGuid().ToString("N")
+        "MSIX_CERT_PASSWORD=$certPasswordPlain" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+        $securePassword = ConvertTo-SecureString -String $certPasswordPlain -Force -AsPlainText
+        $cert = New-SelfSignedCertificate -Type Custom -Subject "CN=WinGoMapsX MSIX" -KeyUsage DigitalSignature -FriendlyName "WinGoMapsX MSIX" -CertStoreLocation "Cert:\CurrentUser\My" -KeyAlgorithm RSA -KeyLength 2048 -HashAlgorithm SHA256
+
+        Export-PfxCertificate -Cert $cert -FilePath "$env:PackageCertificatePath" -Password $securePassword | Out-Null
+        Export-Certificate -Cert $cert -FilePath "$env:PackageCertificateCerPath" | Out-Null
       
     - name: Build solution
-      run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:Platform=$env:Platform /p:AppxBundlePlatforms="x64" /p:AppxBundle=Always /p:UapAppxPackageBuildMode=SideloadOnly /p:AppxPackageSigningEnabled=false
+      run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:Platform=$env:Platform /p:AppxBundlePlatforms="x64" /p:AppxBundle=Always /p:UapAppxPackageBuildMode=SideloadOnly /p:AppxPackageSigningEnabled=true /p:PackageCertificateKeyFile="$env:PackageCertificatePath" /p:PackageCertificatePassword="$env:MSIX_CERT_PASSWORD"
       
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -37,3 +51,10 @@ jobs:
         name: WinGoMapsX-Package
         path: |
           WinGoMapsX/AppPackages/**
+
+    - name: Upload signing certificate
+      uses: actions/upload-artifact@v4
+      with:
+        name: WinGoMapsX-Signing-Certificate
+        path: |
+          ${{ env.PackageCertificateCerPath }}
