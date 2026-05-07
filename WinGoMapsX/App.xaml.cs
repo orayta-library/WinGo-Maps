@@ -264,7 +264,7 @@ namespace WinGoMapsX
             deferral.Complete();
         }
 
-        private async void App_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        private async void App_UnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
         {
             e.Handled = true;
             await new MessageDialog($"{e.Message}{Environment.NewLine}{e.Exception.StackTrace}").ShowAsync();
