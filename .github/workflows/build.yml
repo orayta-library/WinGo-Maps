@@ -1,0 +1,42 @@
+name: Build UWP App
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    env:
+      Solution_Name: WinGoMapsX.sln
+      Configuration: Release
+      Platform: x64
+      
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+      
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v2
+      
+    - name: Restore NuGet packages
+      run: nuget restore $env:Solution_Name
+      
+    - name: Build solution
+      run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:Platform=$env:Platform /p:AppxBundle=Always /p:UapAppxPackageBuildMode=StoreUpload
+      
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: WinGoMapsX-Package
+        path: |
+          **/AppPackages/**/*.msix
+          **/AppPackages/**/*.appx
+          **/AppPackages/**/*.appxbundle
