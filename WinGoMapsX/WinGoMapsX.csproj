@@ -103,7 +103,6 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="AppCommand.cs" />
-    <Compile Include="AppCore.cs" />
     <Compile Include="Converter\ValueToIsEnabledConverter.cs" />
     <Compile Include="ExtendedSplashScreen.xaml.cs">
       <DependentUpon>ExtendedSplashScreen.xaml</DependentUpon>
